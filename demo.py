@@ -109,41 +109,41 @@ def main():
     gt_path = "./data/Skeletons/Aeroplane/Partial/"
     imgs = os.listdir(img_path)
 
-    # for epoch in tqdm(range(epochs)):
-    #   for im1 in tqdm(imgs):
-    #       image_a_path = img_path + im1
-    #       img_a, img_a_padded, pad_a= load_image(image_a_path)
-    #       gt_a_path = gt_path + im1
-    #       gt_a, gt_a_padded, _,mask= load_gt(gt_a_path)
-    #       gt_a_padded = gt_a_padded.to(device)
-    #       img_a_padded = img_a_padded.to(device)
-    #       mask = mask.to(device)
-    #       # mean_mask = np.zeros_like()
-    #       for im2 in imgs:
+    for epoch in tqdm(range(epochs)):
+      for im1 in tqdm(imgs):
+          image_a_path = img_path + im1
+          img_a, img_a_padded, pad_a= load_image(image_a_path)
+          gt_a_path = gt_path + im1
+          gt_a, gt_a_padded, _,mask= load_gt(gt_a_path)
+          gt_a_padded = gt_a_padded.to(device)
+          img_a_padded = img_a_padded.to(device)
+          mask = mask.to(device)
+          # mean_mask = np.zeros_like()
+          for im2 in imgs:
 
-    #           image_b_path = img_path + im2
-    #           if image_a_path!=image_b_path:
+              image_b_path = img_path + im2
+              if image_a_path!=image_b_path:
 
-    #               gt_b_path = gt_path + im2
-    #               # load img_b
-    #               img_b, img_b_padded, pad_b= load_image(image_b_path)
-    #               # load gt_b
-    #               gt_b, gt_b_padded, _,asd= load_gt(gt_b_path)
+                  gt_b_path = gt_path + im2
+                  # load img_b
+                  img_b, img_b_padded, pad_b= load_image(image_b_path)
+                  # load gt_b
+                  gt_b, gt_b_padded, _,asd= load_gt(gt_b_path)
 
                   
-    #               gt_b_padded = gt_b_padded.to(device)
+                  gt_b_padded = gt_b_padded.to(device)
 
-    #               img_b_padded = img_b_padded.to(device)
-    #               out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
-    #             #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
-    #               mask +=out_a
-    #               l1 = criterion(out_a, gt_a_padded)
-    #               l2 = criterion(out_b, gt_b_padded)
-    #               loss = l1 +l2
-    #               optimizer.zero_grad()
-    #               loss.backward()
-    #               optimizer.step()
-    #       mask /= len(imgs)-1
+                  img_b_padded = img_b_padded.to(device)
+                  out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
+                #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
+                  mask +=out_a
+                  l1 = criterion(out_a, gt_a_padded)
+                  l2 = criterion(out_b, gt_b_padded)
+                  loss = l1 +l2
+                  optimizer.zero_grad()
+                  loss.backward()
+                  optimizer.step()
+          mask /= len(imgs)-1
 
     torch.save(net,"model.pth")
     # result_a = remove_pad(out_a[0,1].cpu().detach().numpy(), pad_a)>0.5
