@@ -149,8 +149,8 @@ def main():
 
     # torch.save(net,"model.pth")
     print("done")
-    result_a = remove_pad(out_a[0,1].cpu().detach().numpy(), pad_a)>0.5
-    result_b = remove_pad(out_b[0,1].cpu().detach().numpy(), pad_b)>0.5
+    result_a = np.where(remove_pad(out_a[0,1].cpu().detach().numpy(), pad_a)>0.5,1,0)
+    result_b = np.where(remove_pad(out_b[0,1].cpu().detach().numpy(), pad_b)>0.5,1,0)
     print(result_a,result_b)
     filtered_img_a = np.tile(result_a,(3,1,1)).transpose((1,2,0))
     filtered_img_b = np.tile(result_b,(3,1,1)).transpose((1,2,0))
