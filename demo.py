@@ -110,7 +110,7 @@ def main():
     imgs = os.listdir(img_path)
 
     for epoch in tqdm(range(epochs)):
-      for im1 in tqdm(imgs,len(imgs)):
+      for im1 in tqdm(imgs):
           image_a_path = img_path + im1
           img_a, img_a_padded, pad_a= load_image(image_a_path)
           gt_a_path = gt_path + im1
