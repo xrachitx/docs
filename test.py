@@ -135,6 +135,7 @@ def main():
     #               gt_b_padded = gt_b_padded.to(device)
 
     img_b_padded = img_b_padded.to(device)
+    print("before")
     out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
     #             #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
     #               mask +=out_a
