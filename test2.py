@@ -154,7 +154,7 @@ def main():
     print(result_a.shape, np.unique(result_a,return_counts=True),np.unique(result_b,return_counts=True))
     filtered_img_a = np.tile(result_a,(3,1,1)).transpose((1,2,0))
     filtered_img_b = np.tile(result_b,(3,1,1)).transpose((1,2,0))
-
+    print(filtered_img_a.shape, np.unique(filtered_img_a,return_counts=True),np.unique(filtered_img_a,return_counts=True))
     plt.subplot(2,2,1)
     plt.imshow(img_a)
     plt.subplot(2,2,2)
