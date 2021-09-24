@@ -16,7 +16,7 @@ from tqdm import tqdm
 
 def load_image(filename, input_size=512):
     im = sio.imread(filename)
-    print("img: ",im.shape)
+    # print("img: ",im.shape)
     h, w = im.shape[:2]
     if h>=w and h>input_size:
         im=zoom(im,(input_size/h,input_size/h,1))
@@ -40,7 +40,7 @@ def load_image(filename, input_size=512):
 
 def load_gt(filename, input_size=512):
     im = sio.imread(filename)
-    print("gt: ",im.shape)
+    # print("gt: ",im.shape)
     h, w = im.shape[:2]
     if h>=w and h>input_size:
         im=zoom(im,(input_size/h,input_size/h))
@@ -63,11 +63,11 @@ def load_gt(filename, input_size=512):
     # final[1,:,:] = im_padded
     # print(np.unique(im_padded))
     final = torch.from_numpy(im_padded).unsqueeze(0)
-    print(im.shape,im_padded.shape)
+    # print(im.shape,im_padded.shape)
     # print(torch.unique(f))
     mask = torch.from_numpy(np.zeros((1,2,final.shape[-2],final.shape[-1]),dtype=float))
-    print(torch.unique(mask))
-    print("AMSKK: ",mask.dtype)
+    # print(torch.unique(mask))
+    # print("AMSKK: ",mask.dtype)
     return im, final, pad,mask
 
 def remove_pad(a, pad):
@@ -110,7 +110,7 @@ def main():
     imgs = os.listdir(img_path)
 
     for epoch in tqdm(range(epochs)):
-      for im1 in imgs:
+      for im1 in tqdm(imgs,len(imgs)):
           image_a_path = img_path + im1
           img_a, img_a_padded, pad_a= load_image(image_a_path)
           gt_a_path = gt_path + im1
@@ -135,7 +135,7 @@ def main():
 
                   img_b_padded = img_b_padded.to(device)
                   out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
-                  print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
+                #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
                   mask +=out_a
                   l1 = criterion(out_a, gt_a_padded)
                   l2 = criterion(out_b, gt_b_padded)
