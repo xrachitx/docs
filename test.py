@@ -147,6 +147,7 @@ def main():
     #       mask /= len(imgs)-1
 
     # torch.save(net,"model.pth")
+    print("done")
     result_a = remove_pad(out_a[0,1].cpu().detach().numpy(), pad_a)>0.5
     result_b = remove_pad(out_b[0,1].cpu().detach().numpy(), pad_b)>0.5
     print(result_a,result_b)
