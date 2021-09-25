@@ -33,7 +33,8 @@ def load_image(filename, input_size=512):
     im_padded = np.pad(im, pad, 'constant', constant_values=0)
     im_padded = im_padded.astype(np.float32)
     im_padded /= 255
-    im_padded = torch.from_numpy(im_padded.transpose((2,0,1))).unsqueeze(0)
+    im_padded = im_padded.transpose((2,0,1))
+    im_padded = np.expand_dims(im_padded, axis=0)
     # print(im.shape,im_padded.shape)
     
     return im, im_padded, pad
@@ -58,20 +59,21 @@ def load_gt(filename, input_size=512):
     im_padded = im_padded.astype(np.float32)
     im_padded /= 255
     im_padded = np.where(im_padded>0.5,1,0)
-    plt.imshow(im_padded)
-    plt.savefig("sample.png")
+    # exit()
+    hello = np.unique(im_padded,return_counts= True)
+    print(hello)
     exit()
-    # final = np.zeros((2,im_padded.shape[0],im_padded.shape[1]),dtype=int)
-    # final[0,:,:] = 1-im_padded
-    # final[1,:,:] = im_padded
+    final = np.zeros((2,im_padded.shape[0],im_padded.shape[1]),dtype=int)
+    final[0,:,:] = 1-im_padded
+    final[1,:,:] = im_padded
     # print(np.unique(im_padded))
-    final = torch.from_numpy(im_padded).unsqueeze(0)
+    final = np.expand_dims(final, axis=0)
     # print(im.shape,im_padded.shape)
     # print(torch.unique(f))
-    mask = torch.from_numpy(np.zeros((1,2,final.shape[-2],final.shape[-1]),dtype=float))
+    # mask = torch.from_numpy(np.zeros((1,2,final.shape[-2],final.shape[-1]),dtype=float))
     # print(torch.unique(mask))
     # print("AMSKK: ",mask.dtype)
-    return im, final, pad,mask
+    return im, final, pad
 
 def remove_pad(a, pad):
     return a[pad[0][0]:a.shape[0]-pad[0][1],pad[1][0]:a.shape[1]-pad[1][1]]
@@ -117,10 +119,10 @@ def main():
           image_a_path = img_path + im1
           img_a, img_a_padded, pad_a= load_image(image_a_path)
           gt_a_path = gt_path + im1
-          gt_a, gt_a_padded, _,mask= load_gt(gt_a_path)
+          gt_a, gt_a_padded, _= load_gt(gt_a_path)
           gt_a_padded = gt_a_padded.to(device)
           img_a_padded = img_a_padded.to(device)
-          mask = mask.to(device)
+        #   mask = mask.to(device)
           # mean_mask = np.zeros_like()
           for im2 in imgs:
 
