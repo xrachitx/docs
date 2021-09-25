@@ -60,7 +60,7 @@ def load_gt(filename, input_size=512):
     im_padded /= 255
     im_padded = np.where(im_padded>0.5,1,0)
     # exit()
-    black,white = np.unique(im_padded,return_counts= True)[0]
+    black,white = np.unique(im_padded,return_counts= True)[0][0],np.unique(im_padded,return_counts= True)[0][1]
     print(black,white)
     exit()
     final = np.zeros((2,im_padded.shape[0],im_padded.shape[1]),dtype=int)
