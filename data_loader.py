@@ -66,9 +66,9 @@ class DOCS_Data(Dataset):
         im_padded = im_padded.astype(np.float32)
         im_padded /= 255
         im_padded = np.where(im_padded>0.5,1,0)
-        hello = np.unique(im_padded,return_counts= True)
-        print(hello)
-        exit()
+        black,white = np.unique(im_padded,return_counts= True)[1]
+        # print(hello)
+        # exit()
         final = np.zeros((2,im_padded.shape[0],im_padded.shape[1]),dtype=int)
         final[0,:,:] = 1-im_padded
         final[1,:,:] = im_padded

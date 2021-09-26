@@ -34,7 +34,7 @@ def load_image(filename, input_size=512):
     im_padded = im_padded.astype(np.float32)
     im_padded /= 255
     im_padded = im_padded.transpose((2,0,1))
-    im_padded = np.expand_dims(im_padded, axis=0)
+    im_padded = torch.from_numpy(np.expand_dims(im_padded, axis=0))
     # print(im.shape,im_padded.shape)
     
     return im, im_padded, pad
@@ -61,19 +61,17 @@ def load_gt(filename, input_size=512):
     im_padded = np.where(im_padded>0.5,1,0)
     # exit()
     black,white = np.unique(im_padded,return_counts= True)[1]
-    print(black,white)
-    exit()
     final = np.zeros((2,im_padded.shape[0],im_padded.shape[1]),dtype=int)
     final[0,:,:] = 1-im_padded
     final[1,:,:] = im_padded
     # print(np.unique(im_padded))
-    final = np.expand_dims(final, axis=0)
+    final = torch.from_numpy(np.expand_dims(final, axis=0))
     # print(im.shape,im_padded.shape)
     # print(torch.unique(f))
     # mask = torch.from_numpy(np.zeros((1,2,final.shape[-2],final.shape[-1]),dtype=float))
     # print(torch.unique(mask))
     # print("AMSKK: ",mask.dtype)
-    return im, final, pad
+    return im, final, pad,black,white 
 
 def remove_pad(a, pad):
     return a[pad[0][0]:a.shape[0]-pad[0][1],pad[1][0]:a.shape[1]-pad[1][1]]
@@ -107,7 +105,8 @@ def main():
     for params in net.parameters():
         params.requires_grad = True
     lr = 0.0001
-    criterion = nn.CrossEntropyLoss()
+    # criterion = nn.CrossEntropyLoss()
+    criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(net.parameters(),lr = lr)
     epochs = 20
     img_path = "./data/Images/Aeroplane/Partial/"
@@ -119,7 +118,7 @@ def main():
           image_a_path = img_path + im1
           img_a, img_a_padded, pad_a= load_image(image_a_path)
           gt_a_path = gt_path + im1
-          gt_a, gt_a_padded, _= load_gt(gt_a_path)
+          gt_a, gt_a_padded, _,black_a,white_a = load_gt(gt_a_path)
           gt_a_padded = gt_a_padded.to(device)
           img_a_padded = img_a_padded.to(device)
         #   mask = mask.to(device)
@@ -133,22 +132,28 @@ def main():
                   # load img_b
                   img_b, img_b_padded, pad_b= load_image(image_b_path)
                   # load gt_b
-                  gt_b, gt_b_padded, _,asd= load_gt(gt_b_path)
+                  gt_b, gt_b_padded, _,asd,black_b,white_b= load_gt(gt_b_path)
 
                   
                   gt_b_padded = gt_b_padded.to(device)
 
                   img_b_padded = img_b_padded.to(device)
                   out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
+                  black_out_a = out_a[:,0,:,:]
+                  black_out_b = out_b[:,0,:,:]
+                  white_out_a = out_a[:,1,:,:]
+                  white_out_b = out_b[:,1,:,:]
+                  print(black_out_a.shape,gt_a_padded.shape)
+                  exit()
                 #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
-                  mask +=out_a
-                  l1 = criterion(out_a, gt_a_padded)
-                  l2 = criterion(out_b, gt_b_padded)
+                #   mask +=out_a
+                  l1 = criterion(black_out_a, gt_a_padded[:,0,:,:]) + criterion(black_out_b, gt_b_padded[:,0,:,:])
+                  l2 = criterion(white_out_a, gt_a_padded[:,1,:,:]) + criterion(white_out_b, gt_b_padded[:,1,:,:])
                   loss = l1 +l2
                   optimizer.zero_grad()
                   loss.backward()
                   optimizer.step()
-          mask /= len(imgs)-1
+        #   mask /= len(imgs)-1
 
     torch.save(net,"model.pth")
     # result_a = remove_pad(out_a[0,1].cpu().detach().numpy(), pad_a)>0.5
