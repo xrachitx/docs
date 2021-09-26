@@ -132,7 +132,7 @@ def main():
                   # load img_b
                   img_b, img_b_padded, pad_b= load_image(image_b_path)
                   # load gt_b
-                  gt_b, gt_b_padded, _,asd,black_b,white_b= load_gt(gt_b_path)
+                  gt_b, gt_b_padded, _,black_b,white_b= load_gt(gt_b_path)
 
                   
                   gt_b_padded = gt_b_padded.to(device)
