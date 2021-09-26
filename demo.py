@@ -147,7 +147,7 @@ def main():
                 #   exit()
                 #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
                 #   mask +=out_a
-                  print(black_out_a.dtype, gt_a_padded[:,0,:,:].dtype)
+                  print("DTYPE OF BLACK PRED AND REAL: ",black_out_a.dtype, gt_a_padded[:,0,:,:].dtype)
                   la_black = criterion(black_out_a, gt_a_padded[:,0,:,:])
                   lb_black = criterion(black_out_b, gt_b_padded[:,0,:,:])
                   la_white = criterion(white_out_a, gt_a_padded[:,1,:,:])
