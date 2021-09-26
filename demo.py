@@ -119,7 +119,7 @@ def main():
           img_a, img_a_padded, pad_a= load_image(image_a_path)
           gt_a_path = gt_path + im1
           gt_a, gt_a_padded, _,black_a,white_a = load_gt(gt_a_path)
-          gt_a_padded = gt_a_padded.to(device)
+          gt_a_padded = gt_a_padded.to(device).float()
           img_a_padded = img_a_padded.to(device)
         #   mask = mask.to(device)
           # mean_mask = np.zeros_like()
@@ -135,7 +135,7 @@ def main():
                   gt_b, gt_b_padded, _,black_b,white_b= load_gt(gt_b_path)
 
                   
-                  gt_b_padded = gt_b_padded.to(device)
+                  gt_b_padded = gt_b_padded.to(device).float()
 
                   img_b_padded = img_b_padded.to(device)
                   out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
