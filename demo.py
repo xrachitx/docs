@@ -143,13 +143,17 @@ def main():
                   black_out_b = out_b[:,0,:,:]
                   white_out_a = out_a[:,1,:,:]
                   white_out_b = out_b[:,1,:,:]
-                  print(black_out_a.shape,gt_a_padded.shape)
-                  exit()
+                #   print(black_out_a.shape,gt_a_padded.shape)
+                #   exit()
                 #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
                 #   mask +=out_a
-                  l1 = criterion(black_out_a, gt_a_padded[:,0,:,:]) + criterion(black_out_b, gt_b_padded[:,0,:,:])
-                  l2 = criterion(white_out_a, gt_a_padded[:,1,:,:]) + criterion(white_out_b, gt_b_padded[:,1,:,:])
-                  loss = l1 +l2
+                  la_black = criterion(black_out_a, gt_a_padded[:,0,:,:])
+                  lb_black = criterion(black_out_b, gt_b_padded[:,0,:,:])
+                  la_white = criterion(white_out_a, gt_a_padded[:,1,:,:])
+                  lb_white = criterion(white_out_b, gt_b_padded[:,1,:,:])
+                  la =   white_a/(black_a+white_a)*la_black + black_a/(black_a+white_a)*la_white
+                  lb =   black_b/(black_b+white_b)*lb_black + white_b/(black_b+white_b)*lb_white
+                  loss = la +lb
                   optimizer.zero_grad()
                   loss.backward()
                   optimizer.step()
