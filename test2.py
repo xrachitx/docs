@@ -53,7 +53,7 @@ def main():
     epochs = 20
     batch_size = 10
     dataset = DOCS_Data("./data/","Aeroplane")
-    train_loader1 = DataLoader(dataset=dataset,batch_size=1,shuffle=True)
+    train_loader1 = DataLoader(dataset=dataset,batch_size=10,shuffle=True)
     # print("LOADER: ",train_loader1)
     # for x in train_loader1:
     #     print(x)
