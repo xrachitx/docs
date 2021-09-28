@@ -96,7 +96,7 @@ def main():
                     lb_black = criterion(black_out_b, gt_b_padded[k,0,:,:])
                     la_white = criterion(white_out_a, gt_a_padded[k,1,:,:])
                     lb_white = criterion(white_out_b, gt_b_padded[k,1,:,:])
-                    la =   white_a[k].item()/(black_a[k].item()+white_a[k].item())*la_black + black_a[k].item()/(black_a[k].item()+white_a[k].item())*la_white
+                    la =   white_a[0].item()/(black_a[0].item()+white_a[0].item())*la_black + black_a[0].item()/(black_a[0].item()+white_a[0].item())*la_white
                     lb =   white_b[k].item()/(black_b[k].item()+white_b[k].item())*lb_black + black_b[k].item()/(black_b[k].item()+white_b[k].item())*lb_white
                     loss += la +lb
                 loss = loss/batch_size
