@@ -84,6 +84,7 @@ def main():
                 # print(out_a.shape,out_b.shape)
                 # exit()
                 loss = 0
+                print("\n\n",black_a.shape,black_b.shape,white_a.shape,white_b.shape)
                 for k in range(batch_size):
                     # exit()
                     black_out_a = out_a[k,0,:,:]
