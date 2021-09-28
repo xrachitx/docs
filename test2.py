@@ -51,9 +51,9 @@ def main():
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(net.parameters(),lr = lr)
     epochs = 20
-    batch_size = 10
+    batch_size = 5
     dataset = DOCS_Data("./data/","Aeroplane")
-    train_loader1 = DataLoader(dataset=dataset,batch_size=1,shuffle=True)
+    train_loader1 = DataLoader(dataset=dataset,batch_size=1,shuffle=True,drop_last=True)
     # print("LOADER: ",train_loader1)
     # for x in train_loader1:
     #     print(x)
@@ -73,7 +73,7 @@ def main():
             img_a_padded = img_a_padded.to(device)
             img_a_padded = img_a_padded.repeat(batch_size,1,1,1)
             gt_a_padded = gt_a_padded.repeat(batch_size,1,1,1)
-            train_loader2 = DataLoader(dataset=dataset,batch_size=batch_size,shuffle=True)
+            train_loader2 = DataLoader(dataset=dataset,batch_size=batch_size,drop_last=True)
             #   mask = mask.to(device)
             # mean_mask = np.zeros_like()
             for (img_b_padded, gt_b_padded,black_b,white_b) in train_loader2:
