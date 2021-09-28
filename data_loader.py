@@ -12,20 +12,20 @@ class DOCS_Data(Dataset):
         self.gt_dir = f"{root_dir}Skeletons/{category}/Partial/"
         self.data = os.listdir(self.img_dir)
         self.data = [[self.img_dir+d,self.gt_dir+d] for d in self.data]
-        print("\n\nDATAAA: ",self.data[0])
+        # print("\n\nDATAAA: ",self.data[0])
         
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
         img_path,gt_path = self.data[idx][0],self.data[idx][1]
-        print("\n\nPLS IMG PATH HERE: ",img_path)
+        # print("\n\nPLS IMG PATH HERE: ",img_path)
         _, image, _ = load_image(img_path)
-        _, image_label, _ ,black,white = self.load_gt(gt_path)
+        _, image_label, _ ,black,white = load_gt(gt_path)
         return image, image_label,black,white 
     
 def load_image(f, input_size=512):
-    print(f"\n\nIMG PATH: {f}")
+    # print(f"\n\nIMG PATH: {f}")
     im = sio.imread(f)
     # print("img: ",im.shape)
     h, w = im.shape[:2]
