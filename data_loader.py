@@ -45,7 +45,7 @@ def load_image(f, input_size=512):
     im_padded = im_padded.astype(np.float32)
     im_padded /= 255
     im_padded = im_padded.transpose((2,0,1))
-    im_padded = np.expand_dims(im_padded, axis=0)
+    # im_padded = np.expand_dims(im_padded, axis=0)
     # print(im.shape,im_padded.shape)
     
     return im, im_padded, pad
@@ -76,7 +76,7 @@ def load_gt(filename, input_size=512):
     final[0,:,:] = 1-im_padded
     final[1,:,:] = im_padded
     # print(np.unique(im_padded))
-    final = np.expand_dims(final, axis=0)
+    # final = np.expand_dims(final, axis=0)
     # print(im.shape,im_padded.shape)
     # print(torch.unique(f))
     # mask = torch.from_numpy(np.zeros((1,2,final.shape[-2],final.shape[-1]),dtype=float))
