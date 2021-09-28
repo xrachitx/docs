@@ -74,6 +74,7 @@ def main():
             img_a_padded = img_a_padded.repeat(batch_size,1,1,1)
             gt_a_padded = gt_a_padded.repeat(batch_size,1,1,1)
             print(img_a_padded.shape,gt_a_padded.shape,black_a,white_a)
+            print(img_a_padded[0,:,:,:] == img_a_padded[1,:,:,:])
             exit()
             #   mask = mask.to(device)
             # mean_mask = np.zeros_like()
