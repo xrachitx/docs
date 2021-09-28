@@ -4,11 +4,11 @@ from scipy.ndimage import zoom
 import numpy as np
 
 class DOCS_Data(Dataset):
-    def __init__(self, root_dir,category, image_height = 28, image_width = 28):
+    def __init__(self, root_dir,category):
         if root_dir[-1] !="/":
             root_dir+="/"
-        self.img_dir = f"{root_dir}Images/{category}/"
-        self.gt_dir = f"{root_dir}Skeletons/{category}/"
+        self.img_dir = f"{root_dir}Images/{category}/Partial/"
+        self.gt_dir = f"{root_dir}Skeletons/{category}/Partial/"
         self.data = os.listdir(self.img_dir)
         self.data = [[self.img_dir+d,self.gt_dir+d] for d in self.data]
         
@@ -18,8 +18,8 @@ class DOCS_Data(Dataset):
     def __getitem__(self, idx):
         img_path,gt_path = self.data[idx][0],self.data[idx][1]
         _, image, _ = self.load_image(img_path)
-        _, image_label, _ = self.load_image(gt_path)
-        return image, image_label
+        _, image_label, _ ,black,white = self.load_gt(gt_path)
+        return image, image_label,black,white 
     
     def load_image(filename, input_size=512):
         im = sio.imread(filename)
@@ -66,10 +66,9 @@ class DOCS_Data(Dataset):
         im_padded = im_padded.astype(np.float32)
         im_padded /= 255
         im_padded = np.where(im_padded>0.5,1,0)
-        black,white = np.unique(im_padded,return_counts= True)[1]
-        # print(hello)
         # exit()
-        final = np.zeros((2,im_padded.shape[0],im_padded.shape[1]),dtype=int)
+        black,white = np.unique(im_padded,return_counts= True)[1]
+        final = np.zeros((2,im_padded.shape[0],im_padded.shape[1]),dtype=float)
         final[0,:,:] = 1-im_padded
         final[1,:,:] = im_padded
         # print(np.unique(im_padded))
@@ -79,4 +78,4 @@ class DOCS_Data(Dataset):
         # mask = torch.from_numpy(np.zeros((1,2,final.shape[-2],final.shape[-1]),dtype=float))
         # print(torch.unique(mask))
         # print("AMSKK: ",mask.dtype)
-        return im, final, pad
+        return im, final, pad,black,white 

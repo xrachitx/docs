@@ -13,62 +13,7 @@ from torchvision import datasets, transforms
 from models.docs import DOCSNet
 import os
 from tqdm import tqdm
-
-def load_image(filename, input_size=512):
-    im = sio.imread(filename)
-    # print("img: ",im.shape)
-    h, w = im.shape[:2]
-    if h>=w and h>input_size:
-        im=zoom(im,(input_size/h,input_size/h,1))
-        h, w = im.shape[:2]
-    elif w>=h and w>input_size:
-        im=zoom(im,(input_size/w,input_size/w,1))
-        h, w = im.shape[:2]
-    
-    pad_top = (input_size - h)//2
-    pad_lef = (input_size - w )//2
-    pad_bottom = input_size - h - pad_top
-    pad_right  = input_size - w  - pad_lef
-    pad = ((pad_top, pad_bottom), (pad_lef, pad_right), (0,0))
-    im_padded = np.pad(im, pad, 'constant', constant_values=0)
-    im_padded = im_padded.astype(np.float32)
-    im_padded /= 255
-    im_padded = torch.from_numpy(im_padded.transpose((2,0,1))).unsqueeze(0)
-    # print(im.shape,im_padded.shape)
-    
-    return im, im_padded, pad
-
-def load_gt(filename, input_size=512):
-    im = sio.imread(filename)
-    # print("gt: ",im.shape)
-    h, w = im.shape[:2]
-    if h>=w and h>input_size:
-        im=zoom(im,(input_size/h,input_size/h))
-        h, w = im.shape[:2]
-    elif w>=h and w>input_size:
-        im=zoom(im,(input_size/w,input_size/w))
-        h, w = im.shape[:2]
-    
-    pad_top = (input_size - h)//2
-    pad_lef = (input_size - w )//2
-    pad_bottom = input_size - h - pad_top
-    pad_right  = input_size - w  - pad_lef
-    pad = ((pad_top, pad_bottom), (pad_lef, pad_right))
-    im_padded = np.pad(im, pad, 'constant', constant_values=0)
-    im_padded = im_padded.astype(np.float32)
-    im_padded /= 255
-    im_padded = np.where(im_padded>0.5,1,0)
-    # final = np.zeros((2,im_padded.shape[0],im_padded.shape[1]),dtype=int)
-    # final[0,:,:] = 1-im_padded
-    # final[1,:,:] = im_padded
-    # print(np.unique(im_padded))
-    final = torch.from_numpy(im_padded).unsqueeze(0)
-    # print(im.shape,im_padded.shape)
-    # print(torch.unique(f))
-    mask = torch.from_numpy(np.zeros((1,2,final.shape[-2],final.shape[-1]),dtype=float))
-    # print(torch.unique(mask))
-    # print("AMSKK: ",mask.dtype)
-    return im, final, pad,mask
+from data_loader import DOCS_Data
 
 def remove_pad(a, pad):
     return a[pad[0][0]:a.shape[0]-pad[0][1],pad[1][0]:a.shape[1]-pad[1][1]]
@@ -102,68 +47,83 @@ def main():
     for params in net.parameters():
         params.requires_grad = True
     lr = 0.0001
-    criterion = nn.CrossEntropyLoss()
+    # criterion = nn.CrossEntropyLoss()
+    criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(net.parameters(),lr = lr)
     epochs = 20
-    img_path = "./data/Images/Aeroplane/Partial/"
-    gt_path = "./data/Skeletons/Aeroplane/Partial/"
-    imgs = os.listdir(img_path)
-    im1 = imgs[0]
-    im2 = imgs[1]
-    # for epoch in tqdm(range(epochs)):
-    #   for im1 in tqdm(imgs):
-    image_a_path = img_path + im1
-    img_a, img_a_padded, pad_a= load_image(image_a_path)
-    #       gt_a_path = gt_path + im1
-    #       gt_a, gt_a_padded, _,mask= load_gt(gt_a_path)
-    #       gt_a_padded = gt_a_padded.to(device)
-    img_a_padded = img_a_padded.to(device)
-    #       mask = mask.to(device)
-    #       # mean_mask = np.zeros_like()
-    #       for im2 in imgs:
+    batch_size = 10
+    dataset = DOCS_Data("./data/","Aeroplane")
+    train_loader1 = DataLoader(dataset=dataset,batch_size=1,shuffle=True)
+    # img_path = "./data/Images/Aeroplane/Partial/"
+    # gt_path = "./data/Skeletons/Aeroplane/Partial/"
+    # imgs = os.listdir(img_path)
 
-    image_b_path = img_path + im2
-    #           if image_a_path!=image_b_path:
+    for epoch in tqdm(range(epochs)):
+        for img_a_padded, gt_a_padded,black_a,white_a in train_loader1:
+            # image_a_path = img_path + im1
+            # img_a, img_a_padded, pad_a= load_image(image_a_path)
+            # gt_a_path = gt_path + im1
+            # gt_a, gt_a_padded, _,black_a,white_a = load_gt(gt_a_path)
+            gt_a_padded = gt_a_padded.to(device).float()
+            img_a_padded = img_a_padded.to(device)
+            print(img_a_padded.shape,gt_a_padded.shape,black_a,white_a)
+            exit()
+            #   mask = mask.to(device)
+            # mean_mask = np.zeros_like()
+            for im2 in imgs:
 
-    #               gt_b_path = gt_path + im2
-    #               # load img_b
-    img_b, img_b_padded, pad_b= load_image(image_b_path)
-    #               # load gt_b
-    #               gt_b, gt_b_padded, _,asd= load_gt(gt_b_path)
+                image_b_path = img_path + im2
+                if image_a_path!=image_b_path:
 
-                  
-    #               gt_b_padded = gt_b_padded.to(device)
+                    gt_b_path = gt_path + im2
+                    # load img_b
+                    img_b, img_b_padded, pad_b= load_image(image_b_path)
+                    # load gt_b
+                    gt_b, gt_b_padded, _,black_b,white_b= load_gt(gt_b_path)
 
-    img_b_padded = img_b_padded.to(device)
-    print("before")
-    out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
-    #             #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
-    #               mask +=out_a
-    #               l1 = criterion(out_a, gt_a_padded)
-    #               l2 = criterion(out_b, gt_b_padded)
-    #               loss = l1 +l2
-    #               optimizer.zero_grad()
-    #               loss.backward()
-    #               optimizer.step()
-    #       mask /= len(imgs)-1
+                    
+                    gt_b_padded = gt_b_padded.to(device).float()
 
-    # torch.save(net,"model.pth")
-    print("done")
-    result_a = np.where(remove_pad(out_a[0,1].cpu().detach().numpy(), pad_a)>0.5,1,0)
-    result_b = np.where(remove_pad(out_b[0,1].cpu().detach().numpy(), pad_b)>0.5,1,0)
-    print(result_a.shape, np.unique(result_a,return_counts=True),np.unique(result_b,return_counts=True))
-    # filtered_img_a = np.tile(result_a,(3,1,1)).transpose((1,2,0))
-    # filtered_img_b = np.tile(result_b,(3,1,1)).transpose((1,2,0))
-    # print(filtered_img_a.shape, np.unique(filtered_img_a,return_counts=True),np.unique(filtered_img_a,return_counts=True))
-    plt.subplot(2,2,1)
-    plt.imshow(img_a)
-    plt.subplot(2,2,2)
-    plt.imshow(img_b)
-    plt.subplot(2,2,3)
-    plt.imshow(result_a)
-    plt.subplot(2,2,4)
-    plt.imshow(result_b)
-    plt.savefig("./out.png")
+                    img_b_padded = img_b_padded.to(device)
+                    out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
+                    black_out_a = out_a[:,0,:,:]
+                    black_out_b = out_b[:,0,:,:]
+                    white_out_a = out_a[:,1,:,:]
+                    white_out_b = out_b[:,1,:,:]
+                    #   print(black_out_a.shape,gt_a_padded.shape)
+                    #   exit()
+                    #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
+                    #   mask +=out_a
+                    la_black = criterion(black_out_a, gt_a_padded[:,0,:,:])
+                    lb_black = criterion(black_out_b, gt_b_padded[:,0,:,:])
+                    la_white = criterion(white_out_a, gt_a_padded[:,1,:,:])
+                    lb_white = criterion(white_out_b, gt_b_padded[:,1,:,:])
+                    la =   white_a/(black_a+white_a)*la_black + black_a/(black_a+white_a)*la_white
+                    lb =   white_b/(black_b+white_b)*lb_black + black_b/(black_b+white_b)*lb_white
+                    loss = la +lb
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+        print(f"Epoch: {epoch}-------Loss: {loss.item()}")
+            
+        #   mask /= len(imgs)-1
+
+    torch.save(net,"model.pth")
+    # result_a = remove_pad(out_a[0,1].cpu().detach().numpy(), pad_a)>0.5
+    # result_b = remove_pad(out_b[0,1].cpu().detach().numpy(), pad_b)>0.5
+
+    # filtered_img_a = img_a * np.tile(result_a,(3,1,1)).transpose((1,2,0))
+    # filtered_img_b = img_b * np.tile(result_b,(3,1,1)).transpose((1,2,0))
+
+    # plt.subplot(2,2,1)
+    # plt.imshow(img_a)
+    # plt.subplot(2,2,2)
+    # plt.imshow(img_b)
+    # plt.subplot(2,2,3)
+    # plt.imshow(filtered_img_a)
+    # plt.subplot(2,2,4)
+    # plt.imshow(filtered_img_b)
+    # plt.show()
 
 if __name__ == '__main__':
     main()
