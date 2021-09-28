@@ -83,27 +83,25 @@ def main():
                 out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
                 # print(out_a.shape,out_b.shape)
                 # exit()
+                loss = 0
                 for k in range(batch_size):
-                    print("white K: ",white_a[k].item())
-                    exit()
+                    # exit()
                     black_out_a = out_a[k,0,:,:]
                     black_out_b = out_b[k,0,:,:]
                     white_out_a = out_a[k,1,:,:]
                     white_out_b = out_b[k,1,:,:]
-                    #   print(black_out_a.shape,gt_a_padded.shape)
-                    #   exit()
-                    #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
-                    #   mask +=out_a
+
                     la_black = criterion(black_out_a, gt_a_padded[k,0,:,:])
                     lb_black = criterion(black_out_b, gt_b_padded[k,0,:,:])
                     la_white = criterion(white_out_a, gt_a_padded[k,1,:,:])
                     lb_white = criterion(white_out_b, gt_b_padded[k,1,:,:])
-                    la =   white_a/(black_a+white_a)*la_black + black_a/(black_a+white_a)*la_white
-                    lb =   white_b/(black_b+white_b)*lb_black + black_b/(black_b+white_b)*lb_white
-                    loss = la +lb
-                    optimizer.zero_grad()
-                    loss.backward()
-                    optimizer.step()
+                    la =   white_a[k].item()/(black_a[k].item()+white_a[k].item())*la_black + black_a[k].item()/(black_a[k].item()+white_a[k].item())*la_white
+                    lb =   white_b[k].item()/(black_b[k].item()+white_b[k].item())*lb_black + black_b[k].item()/(black_b[k].item()+white_b[k].item())*lb_white
+                    loss += la +lb
+                loss = loss/batch_size
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
         print(f"Epoch: {epoch}-------Loss: {loss.item()}")
             
         #   mask /= len(imgs)-1
