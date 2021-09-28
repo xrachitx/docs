@@ -149,20 +149,20 @@ def main():
 
     # torch.save(net,"model.pth")
     print("done")
-    result_a = remove_pad(out_a[0,1].cpu().detach().numpy(), pad_a)>0.5
-    result_b = remove_pad(out_b[0,1].cpu().detach().numpy(), pad_b)>0.5
-    print(result_a,result_b)
-    filtered_img_a = np.tile(result_a,(3,1,1)).transpose((1,2,0))
-    filtered_img_b = np.tile(result_b,(3,1,1)).transpose((1,2,0))
-
+    result_a = np.where(remove_pad(out_a[0,1].cpu().detach().numpy(), pad_a)>0.5,1,0)
+    result_b = np.where(remove_pad(out_b[0,1].cpu().detach().numpy(), pad_b)>0.5,1,0)
+    print(result_a.shape, np.unique(result_a,return_counts=True),np.unique(result_b,return_counts=True))
+    # filtered_img_a = np.tile(result_a,(3,1,1)).transpose((1,2,0))
+    # filtered_img_b = np.tile(result_b,(3,1,1)).transpose((1,2,0))
+    # print(filtered_img_a.shape, np.unique(filtered_img_a,return_counts=True),np.unique(filtered_img_a,return_counts=True))
     plt.subplot(2,2,1)
     plt.imshow(img_a)
     plt.subplot(2,2,2)
     plt.imshow(img_b)
     plt.subplot(2,2,3)
-    plt.imshow(filtered_img_a)
+    plt.imshow(result_a)
     plt.subplot(2,2,4)
-    plt.imshow(filtered_img_b)
+    plt.imshow(result_b)
     plt.savefig("./out.png")
 
 if __name__ == '__main__':
