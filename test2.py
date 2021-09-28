@@ -64,7 +64,7 @@ def main():
     # imgs = os.listdir(img_path)
 
     for epoch in tqdm(range(epochs)):
-        for (img_a_padded, gt_a_padded,black_a,white_a) in train_loader1:
+        for (img_a_padded, gt_a_padded,black_a,white_a) in tqdm(train_loader1):
             # image_a_path = img_path + im1
             # img_a, img_a_padded, pad_a= load_image(image_a_path)
             # gt_a_path = gt_path + im1
@@ -76,7 +76,7 @@ def main():
             train_loader2 = DataLoader(dataset=dataset,batch_size=batch_size,drop_last=True)
             #   mask = mask.to(device)
             # mean_mask = np.zeros_like()
-            for (img_b_padded, gt_b_padded,black_b,white_b) in tqdm(train_loader2):
+            for (img_b_padded, gt_b_padded,black_b,white_b) in train_loader2:
 
                 gt_b_padded = gt_b_padded.to(device).float()
                 img_b_padded = img_b_padded.to(device)
