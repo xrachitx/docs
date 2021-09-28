@@ -160,9 +160,9 @@ def main():
     plt.subplot(2,2,2)
     plt.imshow(img_b)
     plt.subplot(2,2,3)
-    plt.imshow(result_a)
+    plt.imshow(filtered_img_a)
     plt.subplot(2,2,4)
-    plt.imshow(result_b)
+    plt.imshow(filtered_img_b)
     plt.savefig("./out.png")
 
 if __name__ == '__main__':
