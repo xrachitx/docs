@@ -24,9 +24,9 @@ class DOCS_Data(Dataset):
         _, image_label, _ ,black,white = self.load_gt(gt_path)
         return image, image_label,black,white 
     
-    def load_image(filename, input_size=512):
-        print(f"\n\nIMG PATH: {filename}")
-        im = sio.imread(filename)
+    def load_image(f, input_size=512):
+        print(f"\n\nIMG PATH: {f}")
+        im = sio.imread(f)
         # print("img: ",im.shape)
         h, w = im.shape[:2]
         if h>=w and h>input_size:
