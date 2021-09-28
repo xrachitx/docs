@@ -53,7 +53,7 @@ def main():
     epochs = 20
     batch_size = 10
     dataset = DOCS_Data("./data/","Aeroplane")
-    train_loader1 = DataLoader(dataset=dataset,batch_size=10,shuffle=True)
+    train_loader1 = DataLoader(dataset=dataset,batch_size=1,shuffle=True)
     # print("LOADER: ",train_loader1)
     # for x in train_loader1:
     #     print(x)
@@ -71,6 +71,8 @@ def main():
             # gt_a, gt_a_padded, _,black_a,white_a = load_gt(gt_a_path)
             gt_a_padded = gt_a_padded.to(device).float()
             img_a_padded = img_a_padded.to(device)
+            img_a_padded = img_a_padded.repeat(batch_size,1,1,1)
+            gt_a_padded = gt_a_padded.repeat(batch_size,1,1,1)
             print(img_a_padded.shape,gt_a_padded.shape,black_a,white_a)
             exit()
             #   mask = mask.to(device)
