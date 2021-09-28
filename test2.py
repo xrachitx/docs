@@ -76,7 +76,7 @@ def main():
             train_loader2 = DataLoader(dataset=dataset,batch_size=batch_size,drop_last=True)
             #   mask = mask.to(device)
             # mean_mask = np.zeros_like()
-            for (img_b_padded, gt_b_padded,black_b,white_b) in train_loader2:
+            for (img_b_padded, gt_b_padded,black_b,white_b) in tqdm(train_loader2):
 
                 gt_b_padded = gt_b_padded.to(device).float()
                 img_b_padded = img_b_padded.to(device)
@@ -84,7 +84,7 @@ def main():
                 # print(out_a.shape,out_b.shape)
                 # exit()
                 loss = 0
-                print("\n\n",black_a.shape,black_b.shape,white_a.shape,white_b.shape)
+                # print("\n\n",black_a.shape,black_b.shape,white_a.shape,white_b.shape)
                 for k in range(batch_size):
                     # exit()
                     black_out_a = out_a[k,0,:,:]
