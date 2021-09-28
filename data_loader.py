@@ -12,6 +12,7 @@ class DOCS_Data(Dataset):
         self.gt_dir = f"{root_dir}Skeletons/{category}/Partial/"
         self.data = os.listdir(self.img_dir)
         self.data = [[self.img_dir+d,self.gt_dir+d] for d in self.data]
+        print("\n\nDATAAA: ",self.data[0])
         
     def __len__(self):
         return len(self.data)
