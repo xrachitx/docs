@@ -73,45 +73,34 @@ def main():
             img_a_padded = img_a_padded.to(device)
             img_a_padded = img_a_padded.repeat(batch_size,1,1,1)
             gt_a_padded = gt_a_padded.repeat(batch_size,1,1,1)
-            print(img_a_padded.shape,gt_a_padded.shape,black_a,white_a)
-            print(img_a_padded[0,:,:,:] == img_a_padded[1,:,:,:])
-            exit()
+            train_loader2 = DataLoader(dataset=dataset,batch_size=batch_size,shuffle=True)
             #   mask = mask.to(device)
             # mean_mask = np.zeros_like()
-            for im2 in imgs:
+            for (img_b_padded, gt_b_padded,black_b,white_b) in train_loader2:
 
-                image_b_path = img_path + im2
-                if image_a_path!=image_b_path:
-
-                    gt_b_path = gt_path + im2
-                    # load img_b
-                    img_b, img_b_padded, pad_b= load_image(image_b_path)
-                    # load gt_b
-                    gt_b, gt_b_padded, _,black_b,white_b= load_gt(gt_b_path)
-
-                    
-                    gt_b_padded = gt_b_padded.to(device).float()
-
-                    img_b_padded = img_b_padded.to(device)
-                    out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
-                    black_out_a = out_a[:,0,:,:]
-                    black_out_b = out_b[:,0,:,:]
-                    white_out_a = out_a[:,1,:,:]
-                    white_out_b = out_b[:,1,:,:]
-                    #   print(black_out_a.shape,gt_a_padded.shape)
-                    #   exit()
-                    #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
-                    #   mask +=out_a
-                    la_black = criterion(black_out_a, gt_a_padded[:,0,:,:])
-                    lb_black = criterion(black_out_b, gt_b_padded[:,0,:,:])
-                    la_white = criterion(white_out_a, gt_a_padded[:,1,:,:])
-                    lb_white = criterion(white_out_b, gt_b_padded[:,1,:,:])
-                    la =   white_a/(black_a+white_a)*la_black + black_a/(black_a+white_a)*la_white
-                    lb =   white_b/(black_b+white_b)*lb_black + black_b/(black_b+white_b)*lb_white
-                    loss = la +lb
-                    optimizer.zero_grad()
-                    loss.backward()
-                    optimizer.step()
+                gt_b_padded = gt_b_padded.to(device).float()
+                img_b_padded = img_b_padded.to(device)
+                out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
+                print(out_a.shape,out_b.shape)
+                exit()
+                black_out_a = out_a[:,0,:,:]
+                black_out_b = out_b[:,0,:,:]
+                white_out_a = out_a[:,1,:,:]
+                white_out_b = out_b[:,1,:,:]
+                #   print(black_out_a.shape,gt_a_padded.shape)
+                #   exit()
+                #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
+                #   mask +=out_a
+                la_black = criterion(black_out_a, gt_a_padded[:,0,:,:])
+                lb_black = criterion(black_out_b, gt_b_padded[:,0,:,:])
+                la_white = criterion(white_out_a, gt_a_padded[:,1,:,:])
+                lb_white = criterion(white_out_b, gt_b_padded[:,1,:,:])
+                la =   white_a/(black_a+white_a)*la_black + black_a/(black_a+white_a)*la_white
+                lb =   white_b/(black_b+white_b)*lb_black + black_b/(black_b+white_b)*lb_white
+                loss = la +lb
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
         print(f"Epoch: {epoch}-------Loss: {loss.item()}")
             
         #   mask /= len(imgs)-1
