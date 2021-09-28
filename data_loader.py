@@ -19,7 +19,7 @@ class DOCS_Data(Dataset):
 
     def __getitem__(self, idx):
         img_path,gt_path = self.data[idx][0],self.data[idx][1]
-        
+        print("\n\nYOO IMG PATH HERE: ",img_path)
         _, image, _ = self.load_image(img_path)
         _, image_label, _ ,black,white = self.load_gt(gt_path)
         return image, image_label,black,white 
