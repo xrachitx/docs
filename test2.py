@@ -54,7 +54,7 @@ def main():
     batch_size = 10
     dataset = DOCS_Data("./data/","Aeroplane")
     train_loader1 = DataLoader(dataset=dataset,batch_size=1,shuffle=True)
-    print(train_loader1)
+    print("LOADER: ",train_loader1)
     
     # img_path = "./data/Images/Aeroplane/Partial/"
     # gt_path = "./data/Skeletons/Aeroplane/Partial/"
