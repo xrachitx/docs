@@ -84,7 +84,7 @@ def main():
                 # print(out_a.shape,out_b.shape)
                 # exit()
                 for k in range(batch_size):
-                    print("white K: ",white_a[k])
+                    print("white K: ",white_a[k].item())
                     exit()
                     black_out_a = out_a[k,0,:,:]
                     black_out_b = out_b[k,0,:,:]
