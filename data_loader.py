@@ -18,12 +18,13 @@ class DOCS_Data(Dataset):
 
     def __getitem__(self, idx):
         img_path,gt_path = self.data[idx][0],self.data[idx][1]
-        print(f"IMG PATH: {img_path}")
+        
         _, image, _ = self.load_image(img_path)
         _, image_label, _ ,black,white = self.load_gt(gt_path)
         return image, image_label,black,white 
     
     def load_image(filename, input_size=512):
+        print(f"\n\nIMG PATH: {filename}")
         im = sio.imread(filename)
         # print("img: ",im.shape)
         h, w = im.shape[:2]
