@@ -59,7 +59,7 @@ def main():
     # imgs = os.listdir(img_path)
 
     for epoch in tqdm(range(epochs)):
-        for img_a_padded, gt_a_padded,black_a,white_a in train_loader1:
+        for (img_a_padded, gt_a_padded,black_a,white_a) in train_loader1:
             # image_a_path = img_path + im1
             # img_a, img_a_padded, pad_a= load_image(image_a_path)
             # gt_a_path = gt_path + im1
