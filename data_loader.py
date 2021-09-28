@@ -2,6 +2,7 @@ import os
 import skimage.io as sio
 from scipy.ndimage import zoom
 import numpy as np
+from torch.utils.data import DataLoader,Dataset
 
 class DOCS_Data(Dataset):
     def __init__(self, root_dir,category):
