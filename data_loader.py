@@ -9,7 +9,7 @@ class DOCS_Data(Dataset):
         if root_dir[-1] !="/":
             root_dir+="/"
         self.img_dir = f"{root_dir}Images/{category}/Partial/"
-        self.gt_dir = f"{root_dir}Skeletons/{category}/Partial/"
+        self.gt_dir = f"{root_dir}Completed Masks/{category}/Partial/"
         self.data = os.listdir(self.img_dir)
         self.data = [[self.img_dir+d,self.gt_dir+d] for d in self.data]
         # print("\n\nDATAAA: ",self.data[0])

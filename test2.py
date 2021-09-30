@@ -50,7 +50,7 @@ def main():
     # criterion = nn.CrossEntropyLoss()
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(net.parameters(),lr = lr)
-    epochs = 20
+    epochs = 10
     batch_size = 5
     dataset = DOCS_Data("./data/","Aeroplane")
     train_loader1 = DataLoader(dataset=dataset,batch_size=1,shuffle=True,drop_last=True)
