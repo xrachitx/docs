@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader,Dataset
-# from torchsummary import summary
+from torchsummary import summary
 from torchvision import datasets, transforms
 from models.docs import DOCSNet
 import os
@@ -62,6 +62,9 @@ def load_gt(filename, input_size=512):
     # final[0,:,:] = 1-im_padded
     # final[1,:,:] = im_padded
     # print(np.unique(im_padded))
+    plt.imshow(im_padded)
+    plt.savefig("sample.png")
+    exit()
     final = torch.from_numpy(im_padded).unsqueeze(0)
     # print(im.shape,im_padded.shape)
     # print(torch.unique(f))
@@ -110,7 +113,7 @@ def main():
     imgs = os.listdir(img_path)
 
     for epoch in tqdm(range(epochs)):
-      for im1 in tqdm(imgs):
+      for im1 in imgs:
           image_a_path = img_path + im1
           img_a, img_a_padded, pad_a= load_image(image_a_path)
           gt_a_path = gt_path + im1
@@ -135,7 +138,7 @@ def main():
 
                   img_b_padded = img_b_padded.to(device)
                   out_a, out_b = net.forward(img_a_padded, img_b_padded, softmax_out=True)
-                #   print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
+                  # print("outa: ",out_a.shape,gt_a_padded.shape,"mask: ", mask.shape)
                   mask +=out_a
                   l1 = criterion(out_a, gt_a_padded)
                   l2 = criterion(out_b, gt_b_padded)
@@ -145,7 +148,7 @@ def main():
                   optimizer.step()
           mask /= len(imgs)-1
 
-    torch.save(net,"model.pth")
+
     # result_a = remove_pad(out_a[0,1].cpu().detach().numpy(), pad_a)>0.5
     # result_b = remove_pad(out_b[0,1].cpu().detach().numpy(), pad_b)>0.5
 
