@@ -53,7 +53,7 @@ def Ls(GTn:torch.tensor, Mn:torch.tensor) -> torch.tensor:
 def Lc(i:int, imgs:list, masks:list, features:list, phi:models) -> torch.tensor:
     """ Triplet loss group wise constraint Equation (14)
     """
-    Ion = phi(masks[i] * imgs[i])
+    Ion = phi(masks[i][:,1,:,:] * imgs[i])
     fi, fts = split_i(features, 1)
     cumsum = 0
     for IGm, I_Gm in fts:
@@ -72,27 +72,33 @@ def main():
 
     # Params
     DEVICE = 'cuda'
-    GROUP_SIZE = 6
+    GROUP_SIZE = 33
     EPOCHS = 800
     TBOARD = False # If you have tensorboard running set it to true
 
 
     # Load data
-    coseg = Coseg(img_set='images/', gt_set='ground_truth/', root_dir="data/042_reproducible/",)
+    coseg = Coseg()
     trloader = DataLoader(coseg, batch_size=1, shuffle=False, num_workers=1)
     imgs = []
+    bw = []
     GTs = []
-    for i, (In, GTn) in enumerate(trloader):
+    finals = []
+    for i, (In, GTn,final,black,white) in enumerate(trloader):
         if i == GROUP_SIZE:
             break
         else:
             In = In.to(DEVICE)
             GTn = GTn.to(DEVICE)
+            final = final.to(DEVICE)
             imgs.append(In)
             GTs.append(GTn)
+            bw.append([black.item(),white.item()])
+            finals.append(final)
+            print(GTn.shape, final.shape)
 
     print("[ OK ] Data loaded")
-    exit()
+    # exit()
 
     # Precompute features
     vgg19_original = models.vgg19()
@@ -125,14 +131,23 @@ def main():
     for epoch in range(EPOCHS):
         
         optimizer.zero_grad()
+        lss_black = 0
+        # lcs_black = 0
+        lss_white = 0
+        # lcs_white = 0
         lss = 0
         lcs = 0
         loss = 0
         
         masks = groupnet(imgs)
+        print(len(masks),masks[0][:,1,:,:].shape)
+        # exit()
         for i in range(len(imgs)):
-            lss += Ls(masks[i], GTs[i])
-
+            lss_black += Ls(masks[i][:,0,:,:], GTs[i][:0,:,:])
+            lss_white += Ls(masks[i][:,1,:,:], GTs[i][:1,:,:])
+            black = bw[i][0]
+            white = bw[i][1]
+            lss += lss_black*(white/(black+white)) + lss_white*(black/(black+white)) 
             # [ PAPER ] suggests to activate group loss after 100 epochs
             if epoch >= 100:
                 lcs += Lc(i, imgs, masks, features, phi)
@@ -164,7 +179,7 @@ def main():
         axs[0,i].axis('off')
         axs[1,i].imshow(GTs[i].detach().cpu().numpy().squeeze(0).squeeze(0))
         axs[1,i].axis('off')
-        axs[2,i].imshow(masks[i].detach().cpu().numpy().squeeze(0).squeeze(0))
+        axs[2,i].imshow(masks[i][:,1,:,:].detach().cpu().numpy().squeeze(0))
         axs[2,i].axis('off')
     plt.savefig("predictions.png")
     plt.close()

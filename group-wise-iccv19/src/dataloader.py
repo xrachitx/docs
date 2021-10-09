@@ -4,10 +4,13 @@ __all__ = ['Coseg']
 
 # Cell
 import os
+import numpy as np
+import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms as T
 import matplotlib.pyplot as plt
 from PIL import Image
+import skimage.io as sio
 
 # Cell
 
@@ -18,7 +21,7 @@ class Coseg(Dataset):
         transform (callable, optional): Optional transform to be applied on a sample.
     """
 
-    def __init__(self, img_set='images/', gt_set='ground_truth/', root_dir="./data/",
+    def __init__(self, img_set='images/', gt_set='ground_truth/', root_dir="./aeroplane/",
                  transform=T.Compose([T.Resize((224,224)), T.ToTensor()])):
 
         self.root_dir = root_dir
@@ -34,10 +37,17 @@ class Coseg(Dataset):
     def __getitem__(self, idx):
         img = Image.open(self.root_dir + self.img_set + self.imgs[idx])
         gt = Image.open(self.root_dir + self.gt_set + self.imgs[idx][:-3] + 'png')
-        # black,white = np.unique(gt,return_counts= True)[1]
-        print( np.unique(gt,return_counts= True))
+        im = sio.imread(self.root_dir + self.gt_set + self.imgs[idx][:-3] + 'png')
+        black,white = np.unique(im,return_counts= True)[1]
         if self.transform:
             img = self.transform(img)
             gt = self.transform(gt)
-
-        return img, gt
+        # print(gt.shape)
+        final = np.zeros((2,gt.shape[1],gt.shape[2]),dtype=float)
+        final[0,:,:] = 1-gt[0,:,:]
+        final[1,:,:] = gt[0,:,:]
+        # print(final,gt[0,:,:])
+        
+        # print(black,white)
+        # exit()
+        return img,gt, final,black,white
