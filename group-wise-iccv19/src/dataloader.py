@@ -43,11 +43,10 @@ class Coseg(Dataset):
             img = self.transform(img)
             gt = self.transform(gt)
         # print(gt.shape)
-        final = np.zeros((2,gt.shape[1],gt.shape[2]),dtype=float)
-        final[0,:,:] = 1-gt[0,:,:]
-        final[1,:,:] = gt[0,:,:]
+        # final = np.zeros_like(gt,dtype=float)
+        final = np.where(gt == 0, (white)/(black+white), (black)/(black+white))
         # print(final,gt[0,:,:])
         
         # print(black,white)
         # exit()
-        return img,gt, final,black,white
+        return img,gt, final

@@ -110,7 +110,7 @@ class MFF(nn.Module):
         self.conv_vhat = nn.Conv2d(128, 128, kernel_size=3, padding=1)
 
         # Dunno how to set these parameters...I just match the output size...
-        self.convT_vhat = nn.ConvTranspose2d(128, 2, kernel_size=14, padding=3, stride=7, dilation=3, output_padding=1)
+        self.convT_vhat = nn.ConvTranspose2d(128, 1, kernel_size=14, padding=3, stride=7, dilation=3, output_padding=1)
 
     def forward(self, Sn, Gn, p3, p4):
 

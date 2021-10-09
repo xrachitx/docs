@@ -53,7 +53,7 @@ def Ls(GTn:torch.tensor, Mn:torch.tensor) -> torch.tensor:
 def Lc(i:int, imgs:list, masks:list, features:list, phi:models) -> torch.tensor:
     """ Triplet loss group wise constraint Equation (14)
     """
-    Ion = phi(masks[i][:,1,:,:] * imgs[i])
+    Ion = phi(masks[i] * imgs[i])
     fi, fts = split_i(features, 1)
     cumsum = 0
     for IGm, I_Gm in fts:
@@ -84,7 +84,7 @@ def main():
     bw = []
     GTs = []
     finals = []
-    for i, (In, GTn,final,black,white) in enumerate(trloader):
+    for i, (In, GTn,final) in enumerate(trloader):
         if i == GROUP_SIZE:
             break
         else:
@@ -93,9 +93,7 @@ def main():
             final = final.to(DEVICE)
             imgs.append(In)
             GTs.append(GTn)
-            bw.append([black.item(),white.item()])
             finals.append(final)
-            print(GTn.shape, final.shape)
 
     print("[ OK ] Data loaded")
     # exit()
@@ -143,10 +141,10 @@ def main():
         print(len(masks),masks[0][:,1,:,:].shape)
         # exit()
         for i in range(len(imgs)):
-            lss_black += Ls(masks[i][:,0,:,:], GTs[i][:0,:,:])
-            lss_white += Ls(masks[i][:,1,:,:], GTs[i][:1,:,:])
-            black = bw[i][0]
-            white = bw[i][1]
+            # lss_black += Ls(masks[i][:,0,:,:], GTs[i][:0,:,:])
+            # lss_white += Ls(masks[i][:,1,:,:], GTs[i][:1,:,:])
+            # black = bw[i][0]
+            # white = bw[i][1]
             lss += lss_black*(white/(black+white)) + lss_white*(black/(black+white)) 
             # [ PAPER ] suggests to activate group loss after 100 epochs
             if epoch >= 100:
