@@ -122,10 +122,13 @@ def main():
             if i == GROUP_SIZE:
                 break
             else:
-                
+
                 imgs.append(In)
                 GTs.append(GTn)
                 weights.append(weight)
+                imgs[i] = imgs[i].to(DEVICE)
+                GTs[i] = GTs[i].to(DEVICE)
+                weights[i] = weights[i].to(DEVICE)
 
         # Precompute features
         print(f"[ OK ] Data loaded: {category}")
@@ -173,10 +176,8 @@ def main():
             weights = data[category][2]
             features = data[category][3]
 
-            for i in range(len(imgs)):
-                imgs[i] = imgs[i].to(DEVICE)
-                GTs[i] = GTs[i].to(DEVICE)
-                weights[i] = weights[i].to(DEVICE)
+            # for i in range(len(imgs)):
+
                 # features[i] = features[i].to(DEVICE)
             # In = In.to(DEVICE)
             # GTn = GTn.to(DEVICE)
@@ -195,10 +196,10 @@ def main():
             if epoch >= 3:  
                 lcs /= len(imgs)
                 
-            for i in range(len(imgs)):
-                imgs[i] = imgs[i].cpu()
-                GTs[i] = GTs[i].cpu()
-                weights[i] = weights[i].cpu()
+            # for i in range(len(imgs)):
+            #     imgs[i] = imgs[i].cpu()
+            #     GTs[i] = GTs[i].cpu()
+            #     weights[i] = weights[i].cpu()
                 # features[i] = features[i].cpu()
 
         # [ PAPER ] suggests 0.1, but it does not work
