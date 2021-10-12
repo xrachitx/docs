@@ -11,7 +11,8 @@ from torchvision import transforms as T
 import matplotlib.pyplot as plt
 from PIL import Image
 import skimage.io as sio
-
+import cv2
+from matplotlib import cm
 # Cell
 
 class Coseg(Dataset):
@@ -21,32 +22,39 @@ class Coseg(Dataset):
         transform (callable, optional): Optional transform to be applied on a sample.
     """
 
-    def __init__(self, img_set='images/', gt_set='ground_truth/', root_dir="./aeroplane/",
+    def __init__(self,category, img_set='images/', gt_set='ground_truth/', root_dir="./data/",
                  transform=T.Compose([T.Resize((224,224)), T.ToTensor()])):
 
         self.root_dir = root_dir
-        self.img_set = img_set
-        self.gt_set = gt_set
+        # print(self.root_dir)
+        # self.root_dir
+        self.img_set = root_dir + img_set + f"{category}/"
+        self.gt_set = root_dir +  gt_set+ f"{category}/"
+        # print(img_set)
         self.transform = transform
-        self.imgs = [x for x in os.listdir(self.root_dir + self.img_set) if (x[-3:] == 'png') or (x[-3:] == 'jpg')]
+        self.imgs = [x for x in os.listdir(self.img_set) if (x[-3:] == 'png') or (x[-3:] == 'jpg')]
 
     def __len__(self):
         return len(self.imgs)
 
 
     def __getitem__(self, idx):
-        img = Image.open(self.root_dir + self.img_set + self.imgs[idx])
-        gt = Image.open(self.root_dir + self.gt_set + self.imgs[idx][:-3] + 'png')
-        im = sio.imread(self.root_dir + self.gt_set + self.imgs[idx][:-3] + 'png')
+        # print("name", self.imgs[idx])
+        img = cv2.imread(self.img_set + self.imgs[idx])
+        img = Image.fromarray(np.uint8(img)).convert('RGB')
+        gt = cv2.imread(self.gt_set + self.imgs[idx][:-3] + 'png',cv2.IMREAD_GRAYSCALE)
+        gt = Image.fromarray(np.uint8(gt))
+        im = cv2.imread(self.gt_set + self.imgs[idx][:-3] + 'png',cv2.IMREAD_GRAYSCALE)
         black,white = np.unique(im,return_counts= True)[1]
         if self.transform:
             img = self.transform(img)
             gt = self.transform(gt)
+        # print("In and GTn and im: ",img.shape, gt.shape,im.shape)
         # print(gt.shape)
         # final = np.zeros_like(gt,dtype=float)
-        final = np.where(gt == 0, (white)/(black+white), (black)/(black+white))
-        # print(final,gt[0,:,:])
+        weight = np.where(gt == 0, (white)/(black+white), (black)/(black+white))
+        # print(weight,gt[0,:,:])
         
         # print(black,white)
         # exit()
-        return img,gt, final
+        return img,gt, weight

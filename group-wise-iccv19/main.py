@@ -16,7 +16,8 @@ from torchvision import transforms as T
 from torch.utils.tensorboard import SummaryWriter
 import torch.optim as optim
 import matplotlib.pyplot as plt
-
+import os
+torch.multiprocessing.set_sharing_strategy('file_system')
 
 def split_i(array:list, i:int) -> (list, list):
     """ Given an array it splits the array in two parts at index i
@@ -49,17 +50,40 @@ def Ls(GTn:torch.tensor, Mn:torch.tensor) -> torch.tensor:
     """
     return (-(GTn * torch.log(Mn+1e-15) + (1- GTn) * torch.log((1- Mn)+1e-15))).sum()
 
+def Ls_modified(GTn:torch.tensor, Mn:torch.tensor, Wn: torch.tensor) -> torch.tensor:
+    """ Cross entropy loss for individual supervision, Equation (12)
+    """
+    x = (-(GTn * torch.log(Mn+1e-15) + (1- GTn) * torch.log((1- Mn)+1e-15)))
+    x = Wn*x
+    x = x.sum()
+    return x
 
-def Lc(i:int, imgs:list, masks:list, features:list, phi:models) -> torch.tensor:
+def L2(GTn:torch.tensor, Mn:torch.tensor, Wn: torch.tensor) -> torch.tensor:
+    """ l2 loss with pixel weighting, Equation (12)
+    """
+    x = torch.sqrt(GTn**2 - Mn**2)
+    x = Wn*x
+    x = x.sum()
+    return x
+
+def Lc(i:int, imgs:list, masks:list, features:list, phi:models,DEVICE:str) -> torch.tensor:
     """ Triplet loss group wise constraint Equation (14)
     """
+    # phi = phi.to(DEVICE)
     Ion = phi(masks[i] * imgs[i])
+    # masks[i] = masks[i].cpu()
+    # imgs[i] = imgs[i].cpu
+    # phi = phi.cpu()
     fi, fts = split_i(features, 1)
     cumsum = 0
     for IGm, I_Gm in fts:
+        IGm = IGm.to(DEVICE)
+        I_Gm = I_Gm.to(DEVICE)
         P = torch.sqrt(((Ion - IGm)**2)+1e-016)
         N = torch.sqrt(((Ion - I_Gm)**2)+1e-016)
         cumsum += softplus(P-N).sum()
+        IGm = IGm.cpu()
+        I_Gm = I_Gm.cpu()
     cumsum /= len(fts)
     return cumsum
 
@@ -72,40 +96,51 @@ def main():
 
     # Params
     DEVICE = 'cuda'
-    GROUP_SIZE = 33
-    EPOCHS = 800
+    GROUP_SIZE = 55
+    EPOCHS = 300
     TBOARD = False # If you have tensorboard running set it to true
 
 
-    # Load data
-    coseg = Coseg()
-    trloader = DataLoader(coseg, batch_size=1, shuffle=False, num_workers=1)
-    imgs = []
-    bw = []
-    GTs = []
-    finals = []
-    for i, (In, GTn,final) in enumerate(trloader):
-        if i == GROUP_SIZE:
-            break
-        else:
-            In = In.to(DEVICE)
-            GTn = GTn.to(DEVICE)
-            final = final.to(DEVICE)
-            imgs.append(In)
-            GTs.append(GTn)
-            finals.append(final)
-
-    print("[ OK ] Data loaded")
-    # exit()
-
-    # Precompute features
+    categories = os.listdir("./data/images/")
+    data = {}
     vgg19_original = models.vgg19()
     phi = nn.Sequential((*(list(vgg19_original.children())[:-2])))
     for param in phi.parameters():
         param.requires_grad = False
+    
+
+    for category in categories:
+        # Load data
+        print(f"Loading Data for {category}")
+        coseg = Coseg(category)
+        trloader = DataLoader(coseg, batch_size=1, shuffle=False, num_workers=1)
+        imgs = []
+        GTs = []
+        weights = []
+        for i, (In, GTn,weight) in enumerate(trloader):
+            if i == GROUP_SIZE:
+                break
+            else:
+                
+                imgs.append(In)
+                GTs.append(GTn)
+                weights.append(weight)
+
+        # Precompute features
+        print(f"[ OK ] Data loaded: {category}")
+
+        features = precompute_features(imgs, GTs, phi)
+
+        print(f"[ OK ] Feature precomputed: {category}")
+
+        data[category] = [imgs,GTs,weights,features]
+
+    # print("[ OK ] Feature precomputed")
+
+
+
+    # exit()
     phi = phi.to(DEVICE)
-    features = precompute_features(imgs, GTs, phi)
-    print("[ OK ] Feature precomputed")
 
 
     # Instantiate the model
@@ -115,72 +150,91 @@ def main():
         groupnet = Model((1,3, 224, 224))
     print("[ OK ] Model instantiated")
 
-
     # Optimizer
     # [ PAPER ] suggests SGD with these parametes, but desn't work
     #optimizer = optim.SGD(groupnet.parameters(), momentum=0.99,lr=0.00005, weight_decay=0.0005)
     optimizer = optim.Adam(groupnet.parameters(), lr=0.00002)
-
 
     # Train Loop
     losses = []
     if TBOARD:
         writer = SummaryWriter()
     for epoch in range(EPOCHS):
+        for category in categories:
+            optimizer.zero_grad()
+            # lss_black = 0
+            # lcs_black = 0
+            # lss_white = 0
+            # lcs_white = 0
+            lss = 0
+            lcs = 0
+            imgs = data[category][0]
+            GTs = data[category][1]
+            weights = data[category][2]
+            features = data[category][3]
+
+            for i in range(len(imgs)):
+                imgs[i] = imgs[i].to(DEVICE)
+                GTs[i] = GTs[i].to(DEVICE)
+                weights[i] = weights[i].to(DEVICE)
+                # features[i] = features[i].to(DEVICE)
+            # In = In.to(DEVICE)
+            # GTn = GTn.to(DEVICE)
         
-        optimizer.zero_grad()
-        lss_black = 0
-        # lcs_black = 0
-        lss_white = 0
-        # lcs_white = 0
-        lss = 0
-        lcs = 0
-        loss = 0
+            masks = groupnet(imgs)
+            # print(len(masks),masks[0][:,1,:,:].shape)
+            # exit()
+            for i in range(len(imgs)):
+                lss += Ls_modified(masks[i], GTs[i],weights[i])
+                # [ PAPER ] suggests to activate group loss after 100 epochs
+                if epoch >= 100:
+                    lcs += Lc(i, imgs, masks, features, phi,DEVICE)
         
-        masks = groupnet(imgs)
-        print(len(masks),masks[0][:,1,:,:].shape)
-        # exit()
-        for i in range(len(imgs)):
-            # lss_black += Ls(masks[i][:,0,:,:], GTs[i][:0,:,:])
-            # lss_white += Ls(masks[i][:,1,:,:], GTs[i][:1,:,:])
-            # black = bw[i][0]
-            # white = bw[i][1]
-            lss += lss_black*(white/(black+white)) + lss_white*(black/(black+white)) 
-            # [ PAPER ] suggests to activate group loss after 100 epochs
-            if epoch >= 100:
-                lcs += Lc(i, imgs, masks, features, phi)
-        
-        lss /= len(imgs)
-        
-        if epoch >= 100:  
-            lcs /= len(imgs)
+            lss /= len(imgs)
+            
+            if epoch >= 100:  
+                lcs /= len(imgs)
+                
+            for i in range(len(imgs)):
+                imgs[i] = imgs[i].cpu()
+                GTs[i] = GTs[i].cpu()
+                weights[i] = weights[i].cpu()
+                # features[i] = features[i].cpu()
 
         # [ PAPER ] suggests 0.1, but it does not work
-        loss = lss + 1.*lcs 
-        loss.backward(retain_graph=True)
-        optimizer.step()
-
+            loss = lss + 1.*lcs 
+            loss.backward(retain_graph=True)
+            optimizer.step()
+            print(f'[ ep {epoch}, cat {category} ] - Loss: {loss.item():.4f}')
+            if epoch%20==0:
+                for category in categories:
+                    fig, axs = plt.subplots(nrows=3, ncols=GROUP_SIZE, figsize=(10,5))
+                    imgs = data[category][0]
+                    GTs = data[category][1]
+                    weights = data[category][2]
+                    features = data[category][3]
+                    for i in range(len(imgs)):
+                        axs[0,i].imshow(imgs[i].detach().cpu().numpy().squeeze(0).transpose(1,2,0))
+                        axs[0,i].axis('off')
+                        axs[1,i].imshow(GTs[i].detach().cpu().numpy().squeeze(0).squeeze(0))
+                        axs[1,i].axis('off')
+                        axs[2,i].imshow(masks[i].detach().cpu().numpy().squeeze(0).squeeze(0))
+                        axs[2,i].axis('off')
+                    plt.savefig(f"predictions_{category}.png")
+                    plt.close()
         if TBOARD:
             writer.add_scalar("loss", loss.item(), epoch)
             utils.tboard_imlist(masks, "masks", epoch, writer)
         losses.append(loss.item())
-        print(f'[ ep {epoch} ] - Loss: {loss.item():.4f}')
+        # print(f'[ ep {epoch} ] - Loss: {loss.item():.4f}')
 
     if TBOARD:
         writer.close()
 
 
     # Plot results in the same folder 
-    fig, axs = plt.subplots(nrows=3, ncols=GROUP_SIZE, figsize=(10,5))
-    for i in range(len(imgs)):
-        axs[0,i].imshow(imgs[i].detach().cpu().numpy().squeeze(0).transpose(1,2,0))
-        axs[0,i].axis('off')
-        axs[1,i].imshow(GTs[i].detach().cpu().numpy().squeeze(0).squeeze(0))
-        axs[1,i].axis('off')
-        axs[2,i].imshow(masks[i][:,1,:,:].detach().cpu().numpy().squeeze(0))
-        axs[2,i].axis('off')
-    plt.savefig("predictions.png")
-    plt.close()
+
+
 
 
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,5))
