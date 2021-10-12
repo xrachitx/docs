@@ -61,7 +61,7 @@ def Ls_modified(GTn:torch.tensor, Mn:torch.tensor, Wn: torch.tensor) -> torch.te
 def L2(GTn:torch.tensor, Mn:torch.tensor, Wn: torch.tensor) -> torch.tensor:
     """ l2 loss with pixel weighting, Equation (12)
     """
-    x = torch.sqrt(GTn**2 - Mn**2)
+    x = torch.abs(GTn - Mn)
     x = Wn*x
     x = x.sum()
     return x
@@ -107,7 +107,8 @@ def main():
     phi = nn.Sequential((*(list(vgg19_original.children())[:-2])))
     for param in phi.parameters():
         param.requires_grad = False
-    
+    phi = phi.to(DEVICE)
+
 
     for category in categories:
         # Load data
@@ -140,8 +141,7 @@ def main():
 
 
     # exit()
-    phi = phi.to(DEVICE)
-
+    
 
     # Instantiate the model
     if DEVICE == 'cuda':
@@ -187,12 +187,12 @@ def main():
             for i in range(len(imgs)):
                 lss += Ls_modified(masks[i], GTs[i],weights[i])
                 # [ PAPER ] suggests to activate group loss after 100 epochs
-                if epoch >= 100:
+                if epoch >= 3:
                     lcs += Lc(i, imgs, masks, features, phi,DEVICE)
         
             lss /= len(imgs)
             
-            if epoch >= 100:  
+            if epoch >= 3:  
                 lcs /= len(imgs)
                 
             for i in range(len(imgs)):
