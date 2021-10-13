@@ -209,7 +209,7 @@ def main():
             print(f'[ ep {epoch}, cat {category} ] - Loss: {loss.item():.4f}')
             if (epoch+1)%50==0:
                 for category in categories:
-                    fig, axs = plt.subplots(nrows=3, ncols=GROUP_SIZE, figsize=(10,5))
+                    fig, axs = plt.subplots(nrows=3, ncols=5, figsize=(10,5))
                     imgs = data[category][0]
                     GTs = data[category][1]
                     weights = data[category][2]
