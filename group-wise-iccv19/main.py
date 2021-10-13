@@ -207,7 +207,7 @@ def main():
             loss.backward(retain_graph=True)
             optimizer.step()
             print(f'[ ep {epoch}, cat {category} ] - Loss: {loss.item():.4f}')
-            if (epoch+1)%20==0:
+            if (epoch+1)%50==0:
                 for category in categories:
                     fig, axs = plt.subplots(nrows=3, ncols=GROUP_SIZE, figsize=(10,5))
                     imgs = data[category][0]
