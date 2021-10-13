@@ -221,7 +221,7 @@ def main():
                         axs[1,i].axis('off')
                         axs[2,i].imshow(masks[i].detach().cpu().numpy().squeeze(0).squeeze(0))
                         axs[2,i].axis('off')
-                    plt.savefig(f"../outs/predictions_{category}_{epoch}.png")
+                    plt.savefig(f"../../outs/predictions_{category}_{epoch}.png")
                     plt.close()
         if TBOARD:
             writer.add_scalar("loss", loss.item(), epoch)
