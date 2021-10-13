@@ -97,11 +97,7 @@ def main():
     # Params
     DEVICE = 'cuda'
     GROUP_SIZE = 55
-<<<<<<< HEAD
     EPOCHS = 250
-=======
-    EPOCHS = 200
->>>>>>> f61fafb586c9742e3597ea3a60cad536f6fda292
     TBOARD = False # If you have tensorboard running set it to true
 
 
@@ -130,7 +126,7 @@ def main():
                 imgs.append(In)
                 GTs.append(GTn)
                 weights.append(weight)
-                imgs[i] = imgs[i].  to(DEVICE)
+                imgs[i] = imgs[i].to(DEVICE)
                 GTs[i] = GTs[i].to(DEVICE)
                 weights[i] = weights[i].to(DEVICE)
 
@@ -192,17 +188,13 @@ def main():
             for i in range(len(imgs)):
                 lss += L2(masks[i], GTs[i],weights[i])
                 # [ PAPER ] suggests to activate group loss after 100 epochs
-                # if epoch >= 100:
-<<<<<<< HEAD
-                    # lcs += Lc(i, imgs, masks, features, phi,DEVICE)
-=======
-                #     lcs += Lc(i, imgs, masks, features, phi,DEVICE)
->>>>>>> f61fafb586c9742e3597ea3a60cad536f6fda292
+                if epoch >= 100:
+                    lcs += Lc(i, imgs, masks, features, phi,DEVICE)
         
             lss /= len(imgs)
             
-            # if epoch >= 100:  
-                # lcs /= len(imgs)
+            if epoch >= 100:  
+                lcs /= len(imgs)
                 
             # for i in range(len(imgs)):
             #     imgs[i] = imgs[i].cpu()
