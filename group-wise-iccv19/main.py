@@ -248,6 +248,12 @@ def main():
     plt.savefig("loss.png")
     plt.close()
     print("[ OK ] Plot")
+    print("Before Changing Current Directories",os.getcwd())
+    os.chdir("../")
+    print("After Changing Current Directories",os.getcwd())
+    print(os.getcwd())
+    torch.save(groupnet,os.getcwd())
+    print("[ OK ] Saved")
 
 
 
