@@ -61,7 +61,7 @@ def Ls_modified(GTn:torch.tensor, Mn:torch.tensor, Wn: torch.tensor) -> torch.te
 def L2(GTn:torch.tensor, Mn:torch.tensor, Wn: torch.tensor) -> torch.tensor:
     """ l2 loss with pixel weighting, Equation (12)
     """
-    x = torch.abs(GTn - Mn)
+    x = torch.sqrt((GTn - Mn)**2+1e-016)
     x = Wn*x
     x = x.sum()
     return x
@@ -97,7 +97,11 @@ def main():
     # Params
     DEVICE = 'cuda'
     GROUP_SIZE = 55
+<<<<<<< HEAD
     EPOCHS = 250
+=======
+    EPOCHS = 200
+>>>>>>> f61fafb586c9742e3597ea3a60cad536f6fda292
     TBOARD = False # If you have tensorboard running set it to true
 
 
@@ -189,7 +193,11 @@ def main():
                 lss += L2(masks[i], GTs[i],weights[i])
                 # [ PAPER ] suggests to activate group loss after 100 epochs
                 # if epoch >= 100:
+<<<<<<< HEAD
                     # lcs += Lc(i, imgs, masks, features, phi,DEVICE)
+=======
+                #     lcs += Lc(i, imgs, masks, features, phi,DEVICE)
+>>>>>>> f61fafb586c9742e3597ea3a60cad536f6fda292
         
             lss /= len(imgs)
             
@@ -209,19 +217,19 @@ def main():
             print(f'[ ep {epoch}, cat {category} ] - Loss: {loss.item():.4f}')
             if (epoch+1)%50==0:
                 for category in categories:
-                    fig, axs = plt.subplots(nrows=3, ncols=GROUP_SIZE, figsize=(10,5))
+                    fig, axs = plt.subplots(nrows=3, ncols=5, figsize=(10,5))
                     imgs = data[category][0]
                     GTs = data[category][1]
                     weights = data[category][2]
                     features = data[category][3]
-                    for i in range(len(imgs)):
+                    for i in range(5):
                         axs[0,i].imshow(imgs[i].detach().cpu().numpy().squeeze(0).transpose(1,2,0))
                         axs[0,i].axis('off')
                         axs[1,i].imshow(GTs[i].detach().cpu().numpy().squeeze(0).squeeze(0))
                         axs[1,i].axis('off')
                         axs[2,i].imshow(masks[i].detach().cpu().numpy().squeeze(0).squeeze(0))
                         axs[2,i].axis('off')
-                    plt.savefig(f"predictions_{category}.png")
+                    plt.savefig(f"./outs/predictions_{category}_{epoch}.png")
                     plt.close()
         if TBOARD:
             writer.add_scalar("loss", loss.item(), epoch)
