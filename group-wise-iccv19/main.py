@@ -163,14 +163,15 @@ def main():
     if TBOARD:
         writer = SummaryWriter()
     for epoch in range(EPOCHS):
+        optimizer.zero_grad()
+        # lss_black = 0
+        # lcs_black = 0
+        # lss_white = 0
+        # lcs_white = 0
+        lss = 0
+        lcs = 0
         for category in categories:
-            optimizer.zero_grad()
-            # lss_black = 0
-            # lcs_black = 0
-            # lss_white = 0
-            # lcs_white = 0
-            lss = 0
-            lcs = 0
+
             imgs = data[category][0]
             GTs = data[category][1]
             weights = data[category][2]
@@ -191,10 +192,10 @@ def main():
                 if epoch >= 100:
                     lcs += Lc(i, imgs, masks, features, phi,DEVICE)
         
-            lss /= len(imgs)
-            
-            if epoch >= 100:  
-                lcs /= len(imgs)
+        lss /= len(imgs)
+        
+        if epoch >= 100:  
+            lcs /= len(imgs)
                 
             # for i in range(len(imgs)):
             #     imgs[i] = imgs[i].cpu()
@@ -203,26 +204,26 @@ def main():
                 # features[i] = features[i].cpu()
 
         # [ PAPER ] suggests 0.1, but it does not work
-            loss = lss + 1.*lcs 
-            loss.backward(retain_graph=True)
-            optimizer.step()
-            print(f'[ ep {epoch}, cat {category} ] - Loss: {loss.item():.4f}')
-            if (epoch+1)%50==0:
-                for category in categories:
-                    fig, axs = plt.subplots(nrows=3, ncols=5, figsize=(10,5))
-                    imgs = data[category][0]
-                    GTs = data[category][1]
-                    weights = data[category][2]
-                    features = data[category][3]
-                    for i in range(5):
-                        axs[0,i].imshow(imgs[i].detach().cpu().numpy().squeeze(0).transpose(1,2,0))
-                        axs[0,i].axis('off')
-                        axs[1,i].imshow(GTs[i].detach().cpu().numpy().squeeze(0).squeeze(0))
-                        axs[1,i].axis('off')
-                        axs[2,i].imshow(masks[i].detach().cpu().numpy().squeeze(0).squeeze(0))
-                        axs[2,i].axis('off')
-                    plt.savefig(f"../../outs/predictions_{category}_{epoch}.png")
-                    plt.close()
+        loss = lss + 1.*lcs 
+        loss.backward(retain_graph=True)
+        optimizer.step()
+        print(f'[ ep {epoch}, cat {category} ] - Loss: {loss.item():.4f}')
+        if (epoch+1)%50==0:
+            for category in categories:
+                fig, axs = plt.subplots(nrows=3, ncols=5, figsize=(10,5))
+                imgs = data[category][0]
+                GTs = data[category][1]
+                weights = data[category][2]
+                features = data[category][3]
+                for i in range(5):
+                    axs[0,i].imshow(imgs[i].detach().cpu().numpy().squeeze(0).transpose(1,2,0))
+                    axs[0,i].axis('off')
+                    axs[1,i].imshow(GTs[i].detach().cpu().numpy().squeeze(0).squeeze(0))
+                    axs[1,i].axis('off')
+                    axs[2,i].imshow(masks[i].detach().cpu().numpy().squeeze(0).squeeze(0))
+                    axs[2,i].axis('off')
+                plt.savefig(f"../../outs/predictions_{category}_{epoch}.png")
+                plt.close()
         if TBOARD:
             writer.add_scalar("loss", loss.item(), epoch)
             utils.tboard_imlist(masks, "masks", epoch, writer)
