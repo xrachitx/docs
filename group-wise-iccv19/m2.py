@@ -66,7 +66,7 @@ def main():
     # Params
     DEVICE = 'cuda'
     GROUP_SIZE = 55
-    EPOCHS = 250
+    EPOCHS = 800
     TBOARD = False # If you have tensorboard running set it to true
 
 
