@@ -22,7 +22,7 @@ class Coseg(Dataset):
         transform (callable, optional): Optional transform to be applied on a sample.
     """
 
-    def __init__(self,category, img_set='images/', gt_set='ground_truth/', root_dir="./data/",
+    def __init__(self,category, img_set='images/', gt_set='seg mask/', root_dir="./data/",
                  transform=T.Compose([T.Resize((224,224)), T.ToTensor()])):
 
         self.root_dir = root_dir
