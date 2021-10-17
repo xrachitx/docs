@@ -158,7 +158,7 @@ def main():
                 axs[1,i].axis('off')
                 axs[2,i].imshow(masks[i].detach().cpu().numpy().squeeze(0).squeeze(0))
                 axs[2,i].axis('off')
-            plt.savefig("predictions.png")
+            plt.savefig("../../predictions.png")
             plt.close()
 
 
