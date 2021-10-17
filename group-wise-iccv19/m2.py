@@ -75,7 +75,7 @@ def main():
     trloader = DataLoader(coseg, batch_size=1, shuffle=False, num_workers=1)
     imgs = []
     GTs = []
-    for i, (In, GTn) in enumerate(trloader):
+    for i, (In, GTn,weight) in enumerate(trloader):
         if i == GROUP_SIZE:
             break
         else:
