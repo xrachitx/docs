@@ -187,7 +187,7 @@ def main():
             # print(len(masks),masks[0][:,1,:,:].shape)
             # exit()
             for i in range(len(imgs)):
-                lss += L2(masks[i], GTs[i],weights[i])
+                lss += Ls(masks[i], GTs[i],weights[i])
                 # [ PAPER ] suggests to activate group loss after 100 epochs
                 if epoch >= 100:
                     lcs += Lc(i, imgs, masks, features, phi,DEVICE)
