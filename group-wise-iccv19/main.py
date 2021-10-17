@@ -168,10 +168,10 @@ def main():
         # lcs_black = 0
         # lss_white = 0
         # lcs_white = 0
-        lss = 0
-        lcs = 0
-        for category in categories:
 
+        for category in categories:
+            lss = 0
+            lcs = 0
             imgs = data[category][0]
             GTs = data[category][1]
             weights = data[category][2]
@@ -192,22 +192,22 @@ def main():
                 if epoch >= 100:
                     lcs += Lc(i, imgs, masks, features, phi,DEVICE)
         
-        lss /= len(imgs)
-        
-        if epoch >= 100:  
-            lcs /= len(imgs)
-                
-            # for i in range(len(imgs)):
-            #     imgs[i] = imgs[i].cpu()
-            #     GTs[i] = GTs[i].cpu()
-            #     weights[i] = weights[i].cpu()
-                # features[i] = features[i].cpu()
+            lss /= len(imgs)
+            
+            if epoch >= 100:  
+                lcs /= len(imgs)
+                    
+                # for i in range(len(imgs)):
+                #     imgs[i] = imgs[i].cpu()
+                #     GTs[i] = GTs[i].cpu()
+                #     weights[i] = weights[i].cpu()
+                    # features[i] = features[i].cpu()
 
-        # [ PAPER ] suggests 0.1, but it does not work
-        loss = lss + 1.*lcs 
-        loss.backward(retain_graph=True)
-        optimizer.step()
-        print(f'[ ep {epoch}, cat {category} ] - Loss: {loss.item():.4f}')
+            # [ PAPER ] suggests 0.1, but it does not work
+            loss = lss + 1.*lcs 
+            loss.backward(retain_graph=True)
+            optimizer.step()
+            print(f'[ ep {epoch}, cat {category} ] - Loss: {loss.item():.4f}')
         if (epoch+1)%50==0:
             for category in categories:
                 fig, axs = plt.subplots(nrows=3, ncols=5, figsize=(10,5))
