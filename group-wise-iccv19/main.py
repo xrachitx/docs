@@ -187,7 +187,7 @@ def main():
             # print(len(masks),masks[0][:,1,:,:].shape)
             # exit()
             for i in range(len(imgs)):
-                lss += Ls(masks[i], GTs[i],weights[i])
+                lss += Ls(masks[i], GTs[i])
                 # [ PAPER ] suggests to activate group loss after 100 epochs
                 if epoch >= 100:
                     lcs += Lc(i, imgs, masks, features, phi,DEVICE)
@@ -208,7 +208,7 @@ def main():
             loss.backward(retain_graph=True)
             optimizer.step()
             print(f'[ ep {epoch}, cat {category} ] - Loss: {loss.item():.4f}')
-        if (epoch+1)%50==0:
+        if (epoch+1)%20==0:
             for category in categories:
                 fig, axs = plt.subplots(nrows=3, ncols=5, figsize=(10,5))
                 imgs = data[category][0]
