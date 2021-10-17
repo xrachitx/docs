@@ -145,21 +145,21 @@ def main():
         losses.append(loss.item())
         print(f'[ ep {epoch} ] - Loss: {loss.item():.4f}')
 
-    if TBOARD:
-        writer.close()
+        if TBOARD:
+            writer.close()
 
-
-    # Plot results in the same folder 
-    fig, axs = plt.subplots(nrows=3, ncols=GROUP_SIZE, figsize=(10,5))
-    for i in range(len(imgs)):
-        axs[0,i].imshow(imgs[i].detach().cpu().numpy().squeeze(0).transpose(1,2,0))
-        axs[0,i].axis('off')
-        axs[1,i].imshow(GTs[i].detach().cpu().numpy().squeeze(0).squeeze(0))
-        axs[1,i].axis('off')
-        axs[2,i].imshow(masks[i].detach().cpu().numpy().squeeze(0).squeeze(0))
-        axs[2,i].axis('off')
-    plt.savefig("predictions.png")
-    plt.close()
+        if (epoch+1)%20==0:
+            # Plot results in the same folder 
+            fig, axs = plt.subplots(nrows=3, ncols=5, figsize=(10,5))
+            for i in range(5):
+                axs[0,i].imshow(imgs[i].detach().cpu().numpy().squeeze(0).transpose(1,2,0))
+                axs[0,i].axis('off')
+                axs[1,i].imshow(GTs[i].detach().cpu().numpy().squeeze(0).squeeze(0))
+                axs[1,i].axis('off')
+                axs[2,i].imshow(masks[i].detach().cpu().numpy().squeeze(0).squeeze(0))
+                axs[2,i].axis('off')
+            plt.savefig("predictions.png")
+            plt.close()
 
 
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,5))
